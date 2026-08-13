@@ -1,4 +1,4 @@
-name: Build Leaf 26.2
+name: Build Epoch-Core 26.2
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     # Run workflow only on main repo
-    if: ${{ github.repository == 'Winds-Studio/Leaf' }}
+    if: ${{ github.repository == 'EpochMCDev/Epoch-Core' }}
     runs-on: blacksmith-8vcpu-ubuntu-2404
     env:
       MC_VERSION: "26.2"
@@ -46,56 +46,14 @@ jobs:
           MC_VERSION: ${{ env.MC_VERSION }}
           BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
 
-      - name: Release Leaf
+      - name: Release Epoch-Core
         uses: softprops/action-gh-release@v2
         with:
-          name: "Leaf ${{ env.MC_VERSION }}"
+          name: "Epoch-Core ${{ env.MC_VERSION }}"
           tag_name: "ver-${{ env.MC_VERSION }}"
-          files: "./leaf-${{ env.MC_VERSION }}-${{ env.BUILD_NUMBER }}.jar"
+          files: "./epoch-core-${{ env.MC_VERSION }}-${{ env.BUILD_NUMBER }}.jar"
           body_path: "./release_notes.md"
           token: "${{ secrets.GITHUB_TOKEN }}"
           target_commitish: "${{ github.sha }}"
           draft: false
           prerelease: false
-
-      - name: Calculate SHA-256
-        id: hash
-        run: |
-          FILE_NAME="leaf-${{ env.MC_VERSION }}-${{ env.BUILD_NUMBER }}.jar"
-          HASH=$(sha256sum "$FILE_NAME" | awk '{ print $1 }')
-          echo "sha256=$HASH" >> $GITHUB_OUTPUT
-
-      - name: Upload JAR to download API
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.API_HOST }}
-          username: ${{ secrets.API_USER }}
-          password: ${{ secrets.API_PASS }}
-          source: "./leaf-${{ env.MC_VERSION }}-${{ env.BUILD_NUMBER }}.jar"
-          target: "~/api/uploads/"
-
-      - name: Insert build to download API
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.API_HOST }}
-          username: ${{ secrets.API_USER }}
-          password: ${{ secrets.API_PASS }}
-          script: |
-            BRANCH="${{ github.ref_name }}"
-            REPO_DIR="/root/Leaf-${BRANCH//\//-}"  # Replace slashes with dashes to avoid directory issues
-
-            [ -d "$REPO_DIR/.git" ] && cd "$REPO_DIR" && git fetch origin && git checkout "$BRANCH" && git reset --hard "origin/$BRANCH" || git clone --branch "$BRANCH" https://github.com/Winds-Studio/Leaf "$REPO_DIR"
-
-            # Proceed to insert the build into the API
-            cd ~/api/cli
-            node insertBuild.js \
-              --projectName leaf \
-              --projectFriendlyName "Leaf" \
-              --version ${{ env.MC_VERSION }} \
-              --versionGroupName ${{ env.MC_VERSION }} \
-              --versionName ${{ env.MC_VERSION }} \
-              --build-number ${{ env.BUILD_NUMBER }} \
-              --repositoryPath "$REPO_DIR" \
-              --storagePath /root/api/storage \
-              --download "primary:/root/api/uploads/leaf-${{ env.MC_VERSION }}-${{ env.BUILD_NUMBER }}.jar:${{ steps.hash.outputs.sha256 }}" \
-              --buildChannel experimental

@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     # Run workflow only on main repo
-    if: ${{ github.repository == 'Winds-Studio/Leaf' }}
+    if: ${{ github.repository == 'EpochMCDev/Epoch-Core' }}
     runs-on: blacksmith-8vcpu-ubuntu-2404
     env:
       MC_VERSION: "26.2"
@@ -37,10 +37,10 @@ jobs:
 
       - name: Rename Paperclip JARs
         run: |
-          mv leaf-server/build/libs/leaf-paperclip-${{ env.MC_VERSION }}*.jar ./leaf-${{ env.MC_VERSION }}.jar
+          mv leaf-server/build/libs/leaf-paperclip-${{ env.MC_VERSION }}*.jar ./epoch-core-${{ env.MC_VERSION }}.jar
 
-      - name: Upload Leaf
+      - name: Upload Epoch-Core
         uses: actions/upload-artifact@v7
         with:
-          path: ./leaf-${{ env.MC_VERSION }}.jar
+          path: ./epoch-core-${{ env.MC_VERSION }}.jar
           archive: false

@@ -3,6 +3,8 @@
 > Epoch MC 服务器服务端核心 · **基于 [Leaf](https://github.com/Winds-Studio/Leaf)**（高性能 [Paper](https://papermc.io/) fork）定制
 > A high-performance Minecraft server core. **Based on [Leaf](https://github.com/Winds-Studio/Leaf).**
 
+[![Build](https://github.com/EpochMCDev/Epoch-Core/actions/workflows/build-262.yml/badge.svg?branch=ver%2F26.2)](https://github.com/EpochMCDev/Epoch-Core/actions/workflows/build-262.yml)
+
 Epoch-Core 是面向 Epoch MC 国战服务器定制的服务端核心，基于 Leaf 26.2（Paper fork）二次开发，
 继承了 Leaf / Paper / Purpur 的高性能优化、异步机制与插件兼容性，并进行了品牌化与游戏机制定制。
 

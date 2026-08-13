@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     # Run workflow only on main repo
-    if: ${{ github.repository == 'Winds-Studio/Leaf' }}
+    if: ${{ github.repository == 'EpochMCDev/Epoch-Core' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,11 +35,6 @@ jobs:
       - name: Build
         run: ./gradlew build -x test
 
-      - name: Publish Maven API
-        continue-on-error: true
-        run: |
-          ./gradlew :leaf-api:publish
-          ./gradlew publishDevBundlePublicationToLeafRepository -PpublishDevBundle=true
-        env:
-          REPO_USER: ${{ secrets.REPO_USER }}
-          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
+      # Epoch-Core 尚未配置 Maven 发布仓库。
+      # 如需发布 leaf-api 到自己的 Maven（如 GitHub Packages 或自建 Nexus），
+      # 在此添加发布步骤，并配置 REPO_USER / REPO_PASSWORD secrets。

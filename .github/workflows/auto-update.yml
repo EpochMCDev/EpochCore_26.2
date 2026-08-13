@@ -9,17 +9,17 @@ jobs:
   fetch_update:
     name: Fetch Update
     # Run workflow only on main repo
-    if: ${{ github.repository == 'Winds-Studio/Leaf' }}
+    if: ${{ github.repository == 'EpochMCDev/Epoch-Core' }}
     runs-on: ubuntu-latest
     outputs:
       update_needed: ${{ steps.checkUpdate.outputs.update_needed }}
       latest_paper_commit: ${{ steps.latestPaperCommit.outputs.latest_paper_commit }}
       curr_paper_commit: ${{ steps.currPaperCommit.outputs.curr_paper_commit }}
     steps:
-      - name: Checkout Leaf repository
+      - name: Checkout Epoch-Core repository
         uses: actions/checkout@v6
         with:
-          path: 'Leaf'
+          path: 'Epoch-Core'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout Paper repository
@@ -36,10 +36,10 @@ jobs:
           cd Paper
           echo "latest_paper_commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Get Leaf current Paper commit hash
+      - name: Get Epoch-Core current Paper commit hash
         id: currPaperCommit
         run: |
-          cd Leaf
+          cd Epoch-Core
           currPaperCommit=$(awk -F '= *' '/^paperCommit/ {print $2}' gradle.properties)
           echo "curr_paper_commit=$currPaperCommit" >> $GITHUB_OUTPUT
 
@@ -56,7 +56,7 @@ jobs:
           CURR_PAPER_COMMIT: ${{ steps.currPaperCommit.outputs.curr_paper_commit }}
 
   build:
-    name: Update and Build Leaf
+    name: Update and Build Epoch-Core
     needs: fetch_update
     if: ${{ needs.fetch_update.outputs.update_needed == 'true' }}
     runs-on: ubuntu-latest
@@ -64,22 +64,22 @@ jobs:
       MC_VERSION: "26.2"
       PR_BRANCH: "chore/update-upstream-${{ github.run_number }}"
     steps:
-      - name: Checkout Leaf repository
+      - name: Checkout Epoch-Core repository
         uses: actions/checkout@v6
         with:
-          path: 'Leaf'
+          path: 'Epoch-Core'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update paperCommit in Leaf
+      - name: Update paperCommit in Epoch-Core
         run: |
-          cd Leaf
+          cd Epoch-Core
           sed -i "s/\(paperCommit\s*=\s*\).*/\1$LATEST_PAPER_COMMIT/" gradle.properties
         env:
           LATEST_PAPER_COMMIT: ${{ needs.fetch_update.outputs.latest_paper_commit }}
 
       - name: Grant execute permission for gradlew
         run: |
-          cd Leaf
+          cd Epoch-Core
           git config --global user.email "no-reply@github.com"
           git config --global user.name "Github Actions"
           chmod +x gradlew
@@ -91,7 +91,7 @@ jobs:
 
       - name: Running tests before push
         run: |
-          cd Leaf
+          cd Epoch-Core
           if ! git diff --quiet; then
             echo "Running tests...."
             ./gradlew applyAllPatches
@@ -102,7 +102,7 @@ jobs:
 
       - name: Check for changes and commit
         run: |
-          cd Leaf
+          cd Epoch-Core
           if ! git diff --quiet; then
             echo "Writing to repo....."
             git checkout -b "${{ env.PR_BRANCH }}"
@@ -118,7 +118,7 @@ jobs:
 
       - name: Create PR
         run: |
-          cd Leaf
+          cd Epoch-Core
           gh pr create \
             --base "ver/${{ env.MC_VERSION }}" \
             --head "${{ env.PR_BRANCH }}" \

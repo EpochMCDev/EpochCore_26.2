@@ -21,7 +21,7 @@ import java.util.concurrent.*;
 
 @NullMarked
 public final class AsyncTracker {
-    private static final String THREAD_NAME = "Leaf Async Tracker Thread";
+    private static final String THREAD_NAME = "EpochCore Async Tracker Thread";
     public static final boolean ENABLED = MultithreadedTracker.enabled;
     public static final int QUEUE = 1024;
     public static final int MIN_CHUNK = 16;

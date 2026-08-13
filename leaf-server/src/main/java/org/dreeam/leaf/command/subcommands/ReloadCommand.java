@@ -40,7 +40,7 @@ public final class ReloadCommand extends PermissionedLeafSubcommand {
     // Gale end - Gale commands - /gale reload command
 
     private void doLeafReload(final CommandSender sender) {
-        Command.broadcastCommandMessage(sender, Component.text("Reloading Leaf config...", NamedTextColor.GREEN));
+        Command.broadcastCommandMessage(sender, Component.text("Reloading EpochCore config...", NamedTextColor.GREEN));
 
         LeafConfig.reloadAsync(sender);
     }

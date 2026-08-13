@@ -19,14 +19,14 @@ public class LeafGlobalConfig {
         configFile.set("config-version", LeafConfig.CURRENT_CONFIG_VERSION);
 
         configFile.addComments("config-version", pickStringRegionBased("""
-                Leaf Config
+                EpochCore Config
 
                 Website: https://www.leafmc.one/
                 Docs: https://www.leafmc.one/docs/getting-started
                 GitHub Repo: https://github.com/Winds-Studio/Leaf
                 Discord: https://discord.com/invite/gfgAwdSEuM""",
             """
-                Leaf 配置
+                EpochCore 配置
 
                 官网: https://www.leafmc.one/zh/
                 文档: https://www.leafmc.one/zh/docs/getting-started

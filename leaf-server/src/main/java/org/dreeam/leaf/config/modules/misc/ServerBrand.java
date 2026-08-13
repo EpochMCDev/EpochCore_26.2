@@ -9,8 +9,8 @@ public class ServerBrand extends ConfigModule {
         return ConfigCategory.MISC.basePath() + ".rebrand";
     }
 
-    public static String serverModName = io.papermc.paper.ServerBuildInfo.buildInfo().brandName();
-    public static String serverGUIName = io.papermc.paper.ServerBuildInfo.buildInfo().brandName() + " Console";
+    public static String serverModName = "EpochCore"; // Leaf - Rebrand
+    public static String serverGUIName = "EpochCore Console"; // Leaf - Rebrand
 
     @Override
     public void onLoaded() {

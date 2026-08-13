@@ -3,6 +3,8 @@ package org.dreeam.leaf.command;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.command.Command;
 import org.bukkit.craftbukkit.util.permissions.CraftDefaultPermissions;
+import org.dreeam.leaf.misc.EnchantmentRestrictionListener;
+import org.leavesmc.leaves.plugin.MinecraftInternalPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ public final class LeafCommands {
     }
 
     public static void registerCommands(final MinecraftServer server) {
-        COMMANDS.forEach((s, command) -> server.server.getCommandMap().register(s, "Leaf", command));
+        COMMANDS.forEach((s, command) -> server.server.getCommandMap().register(s, "EpochCore", command));
+        server.server.getPluginManager().registerEvents(new EnchantmentRestrictionListener(), MinecraftInternalPlugin.INSTANCE); // Leaf - Enchantment restrictions
     }
 }

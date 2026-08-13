@@ -11,7 +11,7 @@ public class MCBugFix extends ConfigModule {
         return ConfigCategory.FIXES.basePath() + ".vanilla-bug-fix";
     }
 
-    public static final Logger LOGGER = LogManager.getLogger("Leaf Vanilla Bug Fix");
+    public static final Logger LOGGER = LogManager.getLogger("EpochCore Vanilla Bug Fix");
 
     public static boolean mc270656 = false;
     public static boolean mc301114 = false;

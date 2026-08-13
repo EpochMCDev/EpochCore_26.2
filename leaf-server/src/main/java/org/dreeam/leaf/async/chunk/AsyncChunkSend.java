@@ -15,7 +15,7 @@ public final class AsyncChunkSend {
         Thread.ofPlatform()
             .priority(Thread.NORM_PRIORITY - 1)
             .uncaughtExceptionHandler(Util::onThreadException)
-            .name("Leaf Async Chunk Sender Thread")
+            .name("EpochCore Async Chunk Sender Thread")
             .factory(),
         new ThreadPoolExecutor.CallerRunsPolicy()
     );

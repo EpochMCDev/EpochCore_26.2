@@ -5,5 +5,5 @@ import org.slf4j.LoggerFactory;
 
 public class LeavesLogger {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("Leaves");
+    public static final Logger LOGGER = LoggerFactory.getLogger("EpochCore");
 }

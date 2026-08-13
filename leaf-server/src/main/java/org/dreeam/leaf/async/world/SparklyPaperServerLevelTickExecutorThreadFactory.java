@@ -16,7 +16,7 @@ public class SparklyPaperServerLevelTickExecutorThreadFactory implements ThreadF
 
     @Override
     public Thread newThread(Runnable runnable) {
-        TickThread.ServerLevelTickThread tickThread = new TickThread.ServerLevelTickThread(runnable, "Leaf Level Ticking Thread - " + this.worldName);
+        TickThread.ServerLevelTickThread tickThread = new TickThread.ServerLevelTickThread(runnable, "EpochCore Level Ticking Thread - " + this.worldName);
 
         if (tickThread.isDaemon()) {
             tickThread.setDaemon(false);

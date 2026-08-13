@@ -66,7 +66,7 @@ public final class LeafCommand extends Command {
 
     public LeafCommand() {
         super(COMMAND_LABEL);
-        this.description = "Leaf related commands";
+        this.description = "EpochCore related commands";
         this.usageMessage = this.createUsageMessage(SUBCOMMANDS.keySet());
         final List<Permission> permissions = SUBCOMMANDS.values().stream().map(LeafSubcommand::getPermission).filter(Objects::nonNull).toList();
         this.setPermission(BASE_PERM);

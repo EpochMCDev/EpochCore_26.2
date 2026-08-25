@@ -26,6 +26,9 @@ env:
   MC_VERSION: "26.2"
   JAVA_VERSION: "25"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: 构建服务端核心

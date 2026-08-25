@@ -1,0 +1,215 @@
+name: 构建 EpochCore
+
+on:
+  push:
+    branches:
+      - main
+      - ver/**
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - ver/**
+  workflow_dispatch:
+    inputs:
+      artifact_type:
+        description: '构建产物类型'
+        required: true
+        type: choice
+        options:
+          - paperclip
+          - bundle
+        default: 'paperclip'
+      create_release:
+        description: '是否发布 Release'
+        required: true
+        type: boolean
+        default: false
+      release_notes:
+        description: 'Release 日志（Markdown 格式）'
+        required: false
+        type: string
+        default: ''
+
+env:
+  MC_VERSION: "26.2"
+  JAVA_VERSION: "25"
+
+jobs:
+  build:
+    name: 构建服务端核心
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==================== 环境准备 ====================
+      - name: 📥 检出代码仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ 配置 JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔧 配置 Git 用户
+        run: |
+          git config --global user.email "ci@epochmc.dev"
+          git config --global user.name "EpochCore CI"
+
+      - name: 📝 设置构建信息
+        id: build_info
+        run: |
+          BUILD_NUMBER="${{ github.run_number }}"
+          COMMIT_HASH="${{ github.sha }}"
+          SHORT_HASH="${COMMIT_HASH:0:7}"
+
+          # 确定构建类型
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            ARTIFACT_TYPE="${{ inputs.artifact_type }}"
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            ARTIFACT_TYPE="paperclip"
+          else
+            ARTIFACT_TYPE="paperclip"
+          fi
+
+          echo "build_number=${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "commit_hash=${COMMIT_HASH}" >> $GITHUB_OUTPUT
+          echo "short_hash=${SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "artifact_type=${ARTIFACT_TYPE}" >> $GITHUB_OUTPUT
+          echo "artifact_name=EpochCore-${MC_VERSION}-${SHORT_HASH}" >> $GITHUB_OUTPUT
+
+          echo "📦 构建类型: ${ARTIFACT_TYPE}"
+          echo "🔢 构建编号: ${BUILD_NUMBER}"
+          echo "📌 提交哈希: ${SHORT_HASH}"
+
+      # ==================== 构建流程 ====================
+      - name: 🔨 应用补丁
+        run: ./gradlew applyAllPatches --stacktrace --no-daemon
+
+      - name: 📦 构建 Paperclip JAR
+        if: steps.build_info.outputs.artifact_type == 'paperclip'
+        run: ./gradlew createPaperclipJar --stacktrace --no-daemon
+
+      - name: 📦 构建 Bundle JAR
+        if: steps.build_info.outputs.artifact_type == 'bundle'
+        run: ./gradlew createReobfBundlerJar --stacktrace --no-daemon
+
+      # ==================== 产物处理 ====================
+      - name: 📋 重命名构建产物
+        id: rename_artifact
+        run: |
+          ARTIFACT_TYPE="${{ steps.build_info.outputs.artifact_type }}"
+          ARTIFACT_NAME="${{ steps.build_info.outputs.artifact_name }}"
+
+          if [ "${ARTIFACT_TYPE}" == "paperclip" ]; then
+            SOURCE_JAR=$(find leaf-server/build/libs -name "leaf-paperclip-*.jar" -type f | head -n 1)
+            TARGET_JAR="${ARTIFACT_NAME}-paperclip.jar"
+          else
+            SOURCE_JAR=$(find leaf-server/build/libs -name "leaf-bundler-*.jar" -type f | head -n 1)
+            TARGET_JAR="${ARTIFACT_NAME}-bundle.jar"
+          fi
+
+          if [ -z "${SOURCE_JAR}" ]; then
+            echo "❌ 错误: 未找到构建产物"
+            exit 1
+          fi
+
+          mv "${SOURCE_JAR}" "${TARGET_JAR}"
+          echo "✅ 产物已重命名: ${TARGET_JAR}"
+          echo "jar_path=${TARGET_JAR}" >> $GITHUB_OUTPUT
+          echo "jar_name=$(basename ${TARGET_JAR})" >> $GITHUB_OUTPUT
+
+      - name: 📤 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build_info.outputs.artifact_name }}
+          path: ${{ steps.rename_artifact.outputs.jar_path }}
+          retention-days: 30
+          compression-level: 0
+
+      # ==================== Release 发布 ====================
+      - name: 📝 生成 Release 日志
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          inputs.create_release == true
+        id: release_notes
+        run: |
+          NOTES_FILE="release_notes.md"
+
+          # 如果用户提供了自定义日志，使用自定义日志
+          if [ -n "${{ inputs.release_notes }}" ]; then
+            echo "${{ inputs.release_notes }}" > "${NOTES_FILE}"
+          else
+            # 否则生成默认日志
+            cat > "${NOTES_FILE}" << 'EOF'
+          ## 📦 EpochCore ${{ env.MC_VERSION }}
+
+          > 基于 [Leaf](https://github.com/Winds-Studio/Leaf) 的高性能 Minecraft 服务端核心
+
+          ### 构建信息
+
+          - **Minecraft 版本**: ${{ env.MC_VERSION }}
+          - **构建编号**: #${{ steps.build_info.outputs.build_number }}
+          - **提交哈希**: `${{ steps.build_info.outputs.short_hash }}`
+          - **构建类型**: ${{ steps.build_info.outputs.artifact_type }}
+          - **构建时间**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+
+          ### 特性
+
+          - ✅ 完全兼容 Spigot / Paper / Purpur 插件
+          - ⚡ 异步寻路、实体生成和实体追踪
+          - 🎨 品牌化定制（F3、GUI 标题、控制台前缀）
+          - 🎮 游戏机制定制（附魔限制等）
+
+          ### 下载说明
+
+          - **Paperclip**: 推荐使用，包含自动更新和安装功能
+          - **Bundle**: 完整打包版本，适合离线部署
+
+          ### 相关链接
+
+          - [源码仓库](https://github.com/${{ github.repository }})
+          - [上游 Leaf](https://github.com/Winds-Studio/Leaf)
+          - [问题反馈](https://github.com/${{ github.repository }}/issues)
+          EOF
+          fi
+
+          echo "notes_path=${NOTES_FILE}" >> $GITHUB_OUTPUT
+
+      - name: 🚀 发布 Release
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          inputs.create_release == true
+        uses: softprops/action-gh-release@v2
+        with:
+          name: EpochCore ${{ env.MC_VERSION }} #${{ steps.build_info.outputs.build_number }}
+          tag_name: v${{ env.MC_VERSION }}-build.${{ steps.build_info.outputs.build_number }}
+          body_path: ${{ steps.release_notes.outputs.notes_path }}
+          files: ${{ steps.rename_artifact.outputs.jar_path }}
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ==================== 构建总结 ====================
+      - name: 📊 构建总结
+        if: always()
+        run: |
+          echo "## 🎉 构建完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 项目 | 信息 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 构建类型 | \`${{ steps.build_info.outputs.artifact_type }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔢 构建编号 | #${{ steps.build_info.outputs.build_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📌 提交哈希 | \`${{ steps.build_info.outputs.short_hash }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 产物名称 | \`${{ steps.rename_artifact.outputs.jar_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ **构建状态**: 成功" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **构建状态**: 失败" >> $GITHUB_STEP_SUMMARY
+          fi

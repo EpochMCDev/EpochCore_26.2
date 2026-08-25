@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: VasilyZa <450270247@qq.com>
+Date: Tue, 25 Aug 2026 17:16:25 +0800
+Subject: [PATCH] EpochCore ASCII art banner
+
+
+diff --git a/src/main/java/io/papermc/paper/PaperBootstrap.java b/src/main/java/io/papermc/paper/PaperBootstrap.java
+index 5d24f049fa88ed619c7793cf57525aca641a6df7..7c5c6dc265b62fbdd30b6bceb973c9fea86f8a02 100644
+--- a/src/main/java/io/papermc/paper/PaperBootstrap.java
++++ b/src/main/java/io/papermc/paper/PaperBootstrap.java
+@@ -20,7 +20,19 @@ public final class PaperBootstrap {
+         SharedConstants.CHECK_DATA_FIXER_SCHEMA = Boolean.getBoolean("paper.updatingMinecraft");
+         // Paper end - Perf: Skip data fixer schema sanity check
+ 
++        // EpochCore start - ASCII art banner
++        LOGGER.info("    ______                 __    ______              ");
++        LOGGER.info("   / ____/___  ____  _____/ /_  / ____/___  ________ ");
++        LOGGER.info("  / __/ / __ \\/ __ \\/ ___/ __ \\/ /   / __ \\/ ___/ _ \\");
++        LOGGER.info(" / /___/ /_/ / /_/ / /__/ / / / /___/ /_/ / /  /  __/");
++        LOGGER.info("/_____/ .___/\\____/\\___/_/ /_/\\____/\\____/_/   \\___/ ");
++        LOGGER.info("     /_/                                             ");
++        LOGGER.info("");
++        LOGGER.info("基于 Leaf 的高性能 Minecraft 服务端核心");
++        LOGGER.info("");
++        // EpochCore end
+         getStartupVersionMessages().forEach(LOGGER::info);
++        LOGGER.info(""); // EpochCore - add blank line after version info
+ 
+         Main.main(options);
+     }

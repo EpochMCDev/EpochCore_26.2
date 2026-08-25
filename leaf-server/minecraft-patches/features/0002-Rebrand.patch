@@ -38,7 +38,27 @@ diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/Mi
 index 7ed0399998a32e55419fb56a69b6e68f5c18ce70..48245b2e498a70b3e7930a74b826e894bf9d8e79 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1311,7 +1311,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1270,6 +1270,19 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+
+             this.nextTickTimeNanos = Util.getNanos();
+             this.initTickSchedule(); // Paper - improve tick loop
++            // EpochCore start - ASCII art banner
++            LOGGER.info("    ______                 __    ______              ");
++            LOGGER.info("   / ____/___  ____  _____/ /_  / ____/___  ________ ");
++            LOGGER.info("  / __/ / __ \\/ __ \\/ ___/ __ \\/ /   / __ \\/ ___/ _ \\");
++            LOGGER.info(" / /___/ /_/ / /_/ / /__/ / / / /___/ /_/ / /  /  __/");
++            LOGGER.info("/_____/ .___/\\____/\\___/_/ /_/\\____/\\____/_/   \\___/ ");
++            LOGGER.info("     /_/                                             ");
++            LOGGER.info("");
++            LOGGER.info("基于 Leaf 的高性能 Minecraft 服务端核心");
++            LOGGER.info("版本: {} | Minecraft: {}", this.getServerModName(), this.getServerVersion());
++            LOGGER.info("项目地址: https://github.com/EpochMCDev/EpochCore_26.2");
++            LOGGER.info("");
++            // EpochCore end
+             this.statusIcon = this.loadStatusIcon().orElse(null);
+             this.status = this.buildServerStatus();
+
+@@ -1311,7 +1324,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              }
              // Paper end - Add onboarding message for initial server start
              // Paper start - Improve outdated version checking

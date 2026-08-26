@@ -10,10 +10,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.dreeam.leaf.config.modules.gameplay.EnchantmentRestrictions;
 
@@ -46,6 +49,20 @@ public class EnchantmentRestrictionListener implements Listener {
         event.getLoot().removeIf(item -> item != null && shouldRemoveBook(item, false));
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPrepareItemCraft(final PrepareItemCraftEvent event) {
+        if (isEnchantingTableRecipe(event.getRecipe())) {
+            event.getInventory().setResult(null); // Hide the result so the recipe cannot be taken at all
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onCraftItem(final CraftItemEvent event) {
+        if (isEnchantingTableRecipe(event.getRecipe())) {
+            event.setCancelled(true); // Second line of defense, e.g. for shift-click crafting
+        }
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onServerLoad(final ServerLoadEvent event) {
         if (event.getType() == ServerLoadEvent.LoadType.STARTUP) {
@@ -62,6 +79,13 @@ public class EnchantmentRestrictionListener implements Listener {
         if (EnchantmentRestrictions.disableEnchantingTableRecipe) {
             Bukkit.removeRecipe(ENCHANTING_TABLE_RECIPE, true); // Remove the crafting recipe and sync clients
         }
+    }
+
+    // Matched by result type instead of recipe key, so plugin defined recipes are covered as well
+    private static boolean isEnchantingTableRecipe(final Recipe recipe) {
+        return EnchantmentRestrictions.disableEnchantingTableRecipe
+            && recipe != null
+            && recipe.getResult().getType() == Material.ENCHANTING_TABLE;
     }
 
     private static boolean shouldRemoveBook(final ItemStack item, final boolean fromFishing) {

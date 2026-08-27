@@ -59,6 +59,7 @@ jobs:
           BUILD_NUMBER="${{ github.run_number }}"
           COMMIT_HASH="${{ github.sha }}"
           SHORT_HASH="${COMMIT_HASH:0:7}"
+          BUILD_TIME="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
           # 确定构建类型
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
@@ -74,10 +75,12 @@ jobs:
           echo "short_hash=${SHORT_HASH}" >> $GITHUB_OUTPUT
           echo "artifact_type=${ARTIFACT_TYPE}" >> $GITHUB_OUTPUT
           echo "artifact_name=EpochCore-${MC_VERSION}-${SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "build_time=${BUILD_TIME}" >> $GITHUB_OUTPUT
 
           echo "构建类型: ${ARTIFACT_TYPE}"
           echo "构建编号: ${BUILD_NUMBER}"
           echo "提交哈希: ${SHORT_HASH}"
+          echo "构建时间: ${BUILD_TIME}"
 
       # ==================== 构建流程 ====================
       - name: 应用补丁
@@ -149,7 +152,7 @@ jobs:
           - **构建编号**: #${{ steps.build_info.outputs.build_number }}
           - **提交哈希**: `${{ steps.build_info.outputs.short_hash }}`
           - **构建类型**: ${{ steps.build_info.outputs.artifact_type }}
-          - **构建时间**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          - **构建时间**: ${{ steps.build_info.outputs.build_time }}
 
           ### 特性
 

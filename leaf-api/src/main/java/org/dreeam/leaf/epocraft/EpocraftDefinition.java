@@ -1,15 +1,15 @@
-package org.dreeam.leaf.epochcraft;
+package org.dreeam.leaf.epocraft;
 
 /**
- * Immutable custom item/block definition supplied by a plugin to the Epochcraft Leaf bridge.
+ * Immutable custom item/block definition supplied by a plugin to the Epocraft Leaf bridge.
  *
  * @param id registry identifier of the custom item/block
  * @param type type of the custom item/block (e.g., "road", "tool", "armor")
  * @param properties custom properties map for type-specific behavior
  */
-public record EpochcraftDefinition(String id, String type, java.util.Map<String, Object> properties) {
+public record EpocraftDefinition(String id, String type, java.util.Map<String, Object> properties) {
 
-    public EpochcraftDefinition {
+    public EpocraftDefinition {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Item/block id cannot be blank");
         }
